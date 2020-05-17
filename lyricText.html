@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+      <meta charset="UTF-8">
+      <meta name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>Document</title>
+      <link rel="stylesheet" href="./css/common.css">
+      <link rel="stylesheet" href="./css/style.css">
+      <link rel="stylesheet" href="https://at.alicdn.com/t/font_1652991_sfy5g0yyka.css">
+</head>
+<body>
+<div class="audio">
+      <div class="CustomPlayer">
+            <div class="CP_left">
+                  <i class="lastsong icon-shangyishoudianji iconfont"></i>
+                  <i class="playpause icon-icon-4 iconfont"></i>
+                  <i class="nextsong icon-shangyishoudianji1 iconfont"></i>
+            </div>
+            <div class="CP_center">
+                  <div class="songpic"></div>
+                  <div class="name">
+                        <div class="getsong">Song</div>
+                        <div class="getsinger">Singer</div>
+                  </div>
+                  <div class="alltime">
+                        <div class="currenttime"></div>
+                        <span class="picon"></span>
+                  </div>
+                  <div class="songtime">
+                        <div class="songcurrenttime">00:00</div>
+                        <span>/</span>
+                        <div class="songalltime">00:00</div>
+                  </div>
+            </div>
+            <div class="CP_right">
+                  <i class="playtype icon-shunxubofang iconfont"></i>
+                  <i class="volume icon-yinliang iconfont"></i>
+                  <i class="history icon-gedan iconfont"></i>
+            </div>
+            <div class="CP_list">
+                  <ul class="playlist">
+                        <li data-id="1365785070">asdasdasdasd</li>
+                        <li data-id="1365785070">asdasdasdasd</li>
+                        <li data-id="1365785070">asdasdasdasd</li>
+                        <li data-id="1365785070">asdasdasdasd</li>
+
+                  </ul>
+                  <div class="CP_lyric"></div>
+            </div>
+            <div class="CP_volume">
+                  <div class="vlall">
+                        <div class="vlcur"></div>
+                  </div>
+
+            </div>
+      </div>
+      <audio autoplay="autoplay" id="audio" ></audio>
+</div>
+<div class="comment">
+      <div class="c_song">
+            <div class="c_pic"></div>
+            <div class="c_songname">Song Name</div>
+            <div class="c_singer">Singer</div>
+            <div class="ly">
+                  <ul class="lyric">
+                  </ul>
+            </div>
+            <i class="icon-cs-xx-1 iconfont"></i>
+      </div>
+      <div class="cc">
+            <i class="icon-cs-xs-1 iconfont"></i>
+      </div>
+      <i class="icon-close iconfont"></i>
+</div>
+<div class="commenthidden">
+      <h4 class="cfont">C</h4>
+      <h4 class="cfont">O</h4>
+      <h4 class="cfont">M</h4>
+      <h4 class="cfont">M</h4>
+      <h4 class="cfont">E</h4>
+      <h4 class="cfont">N</h4>
+      <h4 class="cfont">T</h4>
+      <i class="icon-fangxiang1 iconfont"></i>
+</div>
+<!--<div class="list">
+      <div class="item" data-id="346089">singer name duration</div>
+      <div class="item" data-id="1365785070">singer Dead Inside duration</div>
+</div>
+<div class="progress"><div class="currentp"></div><span class="picon"></span></div>
+<div class="time">
+      <div class="currenttime">00:00</div>
+      <div class="pre">上一首</div>
+      <div class="play">播放</div>
+      <div class="next">下一首</div>
+      <div class="duration">00:00</div>
+</div>
+<div class="container">
+      <ul>
+      </ul>
+</div>-->
+<button>开始</button>
+</body>
+<script src="js/函数封装.js"></script>
+<script src="js/Ajax封装.js"></script>
+<script>
+    //播放器 功能
+    var cplist = document.querySelector('.CP_list');
+    var list = document.querySelector('.playlist');
+    var ul = document.querySelector('.lyric');
+    var audio = document.querySelector('audio');
+    var currentp = document.querySelector('.currenttime');
+    var progress = document.querySelector('.alltime');
+    var picon = document.querySelector('.picon');
+    var dr = document.querySelector('.songalltime');
+    var cur = document.querySelector('.songcurrenttime');
+    var pre = document.querySelector('.lastsong');
+    var next = document.querySelector('.nextsong');
+    var playbtn = document.querySelector('.playpause');
+    var playtype = document.querySelector('.playtype');
+    var songIndex = 0;
+    var historyFlag = 0;//判断  list是否展开
+    var volumeFlag = 0;//用于判断 音量 当前处于  显示还是隐藏
+    playtype.onclick = function(){
+      if(playtype.className === "playtype icon-shunxubofang iconfont") {
+          playtype.className = 'playtype icon-bofangye-caozuolan-suijibofang iconfont';
+      }
+      else{
+          playtype.className = 'playtype icon-shunxubofang iconfont';
+      }
+    };
+    document.querySelector('.volume').addEventListener('click', function () {//音量  显示或隐藏 事件
+        if (volumeFlag === 0) {
+            Show('.CP_volume');
+            volumeFlag = 1;
+        } else {
+            Hide('.CP_volume');
+            volumeFlag = 0;
+        }
+    });
+    document.querySelector('.history').addEventListener('click', function () {  //播放历史点击事件
+        if (historyFlag === 0) {
+            Show('.CP_list');
+            historyFlag = 1;
+        } else {
+            Hide('.CP_list');
+            historyFlag = 0;
+        }
+    });
+    list.addEventListener('click',function (e) {
+        if(e.target.tagName === "SPAN"){
+            for(let i = 0;i < e.target.parentNode.parentNode.children.length;i++){
+                e.target.parentNode.parentNode.children[i].style.borderBottom = '1px #bc7ed8 solid';
+            }
+            console.log(1);
+            e.target.parentNode.style.borderBottom = '1px #d8cb68 solid';
+        }
+    });
+    pre.onclick = function(){
+        if(songIndex === 0){
+            songIndex = list.children.length-1;
+        }
+        else{
+            songIndex--;
+        }
+        changemusic();
+        playbtn.click();
+    };
+    next.onclick = function(){
+        if(songIndex === list.children.length-1){
+            songIndex = 0;
+        }else{
+            songIndex++;
+        }
+        changemusic();
+        playbtn.click();
+    };
+    playbtn.onclick = function(){
+        if(audio.paused){
+            document.querySelector('.c_pic').style.animationPlayState = 'running';
+            playbtn.className = "playpause icon-zantingtingzhi iconfont";
+            audio.play();
+        }
+        else{
+            document.querySelector('.c_pic').style.animationPlayState = 'paused';
+            playbtn.className = "playpause icon-icon-4 iconfont";
+            audio.pause();
+        }
+    };
+    audio.addEventListener('timeupdate',function () {
+        playTime();
+    });
+    function playTime() {
+        if(audio.currentTime == audio.duration){//判断是否播放结束,是则点击播放一下首
+            if(playtype.className === "playtype icon-shunxubofang iconfont") {
+                next.click();
+                playbtn.click();
+            }
+            else{
+                songIndex = Math.floor(Math.random()*(list.children.length));
+                next.click();
+                playbtn.click();
+            }
+        }
+        dr.innerHTML = format(audio.duration);
+        let time = audio.currentTime / audio.duration;
+        picon.style.left = time*progress.clientWidth+"px";
+        currentp.style.width = time*progress.clientWidth+"px";
+        cur.innerHTML = format(audio.currentTime);
+        var id_num = parseInt(audio.currentTime);
+        var lyric_p = ul.children;
+        for(let i = 0;i < lyric_p.length;i++){
+            lyric_p[i].index = i;
+        }
+        if(document.getElementById("lyric"+id_num)){
+            var obj = document.getElementById("lyric"+id_num);
+            for(var i=0;i<obj.index;i++) {
+                lyric_p[i].className="played";
+            }
+            for(var j=obj.index;j<lyric_p.length;j++) {
+                lyric_p[j].className="";
+            }
+            obj.className = 'lycurrent';
+            ul.style.top = ul.parentNode.offsetHeight/2-obj.offsetTop+"px";
+        }
+    }
+    //拖拽
+    picon.onmousedown = function (e) {
+        var initX = e.pageX - this.offsetLeft;
+        this.onmousemove = function (e) {
+            var x = e.pageX - initX;
+            if(x >= this.offsetParent.clientWidth){
+                x = this.offsetParent.clientWidth;
+            }else if(x <= 0){
+                x = 0;
+            }
+            let ct = x/this.offsetParent.clientWidth * audio.duration;
+            this.style.left = x+"px";
+            currentp.style.width = x+"px";
+            audio.currentTime = ct;
+            playTime();
+        };
+        document.onmouseup = function () {
+            picon.onmousemove = null;
+        }
+    };
+    progress.onclick = function (e) {
+        let x = e.pageX - (this.offsetLeft - this.clientWidth / 2 + this.offsetParent.offsetLeft + this.offsetParent.offsetParent.offsetLeft);
+        let ct = x/this.clientWidth * audio.duration;
+        currentp.style.width = x+"px";
+        picon.style.left = x+"px";
+        audio.currentTime = ct;
+        playTime();
+    };
+    function lyric_ctrl() {
+        let id = list.children[songIndex].getAttribute('data-id');
+        Ajax('JSON', false).get("https://api.imjad.cn/cloudmusic/?type=lyric&id="+id+"", function (data) {
+            var html = '';
+            var lyric= data.lrc.lyric;
+            var temp = lyric.split("\n");
+            for(let i = 0;i < temp.length;i++) {
+                var arr = temp[i].split("]");
+                var text = arr[1];
+                var m = arr[0].split(".")[0].split(":")[0].split("[")[1];
+                var s = arr[0].split(".")[0].split(":")[1];
+                var s_sum = parseInt(m*60) + parseInt(s);
+                if(text) {
+                    html += "<li id='lyric"+s_sum+"'>"+text+"</li>";
+                }
+            }
+            ul.innerHTML = html;
+        })
+    }
+    function audioInit() {
+        currentp.style.width = 0;
+        picon.style.left = 0;
+        let id = list.children[songIndex].getAttribute('data-id');
+        audio.src = "https://music.163.com/song/media/outer/url?id="+id+".mp3";
+    }
+    function changemusic() {
+        audioInit();
+        lyric_ctrl();
+        playbtn.click();
+        let id = list.children[songIndex].getAttribute('data-id');
+        /*Ajax('JSON',false).get("http://musicapi.leanapp.cn/song/detail?ids=" + id + "",function (songdata) {
+            document.querySelector('.getsong').innerText = "" + songdata.songs[0].name + "";//更改  歌名
+            document.querySelector('.c_songname').innerText = "" + songdata.songs[0].name + "";//更改  歌名
+            document.querySelector('.getsinger').innerText = "" + songdata.songs[0].ar[0].name + "";//更改  歌手
+            document.querySelector('.c_singer').innerText = "" + songdata.songs[0].ar[0].name + "";//更改  歌手
+            document.querySelector('.songpic').style.background = 'url(' + songdata.songs[0].al.picUrl + ') no-repeat';//更换  歌手图片
+            document.querySelector('.c_pic').style.background = 'url(' + songdata.songs[0].al.picUrl + ') no-repeat';//更换  歌手图片
+            document.querySelector('.songpic').style.backgroundSize = 'cover';
+            document.querySelector('.c_pic').style.backgroundSize = 'cover';
+        });*/
+    }
+    function format(time) {
+        var time=parseInt(time);
+        var m=parseInt(time/60);
+        var s=parseInt(time%60);
+        m=zero(m);
+        s=zero(s);
+        function zero(num)
+        {
+            if(num<10)
+            {
+                num="0"+num;
+            }
+            return num;
+        }
+        return m+":"+s;
+    }
+    //音量控制
+    var vol = 0.5;//当前音量 大小
+    audio.volume = "" + vol + "";   //初始化音量
+    var vlall = document.querySelector('.vlall');//音量的总高度
+    vlall.addEventListener('click', function (e) {
+        var vl = this.clientHeight - (e.pageY - window.pageYOffset - (this.offsetParent.offsetParent.offsetParent.offsetTop - this.offsetParent.clientHeight + 25));//得到鼠标在总音量里的坐标
+        vol = vl / this.clientHeight;//用鼠标  与当前的高度 进行比例化
+        document.querySelector('.vlcur').style.height = "" + vl + "" + "px";//用于当前音量的高度 变化
+        audio.volume = "" + vol + "";//音量大小变化
+    });
+
+
+    //评论
+    var cc = document.querySelector('.cc');
+    var c_up = document.querySelector('.icon-cs-xs-1');
+    var comment = document.querySelector('.comment');
+    var c_close = document.querySelector('.icon-close');
+    var ch = document.querySelector('.commenthidden');
+    var c_drop = document.querySelector('.icon-cs-xx-1');
+    var c_song = document.querySelector('.c_song');
+    c_close.addEventListener('click', function () {
+        comment.style.left = '-420px';
+        ch.style.left = '0';
+    });
+    ch.addEventListener('click', function () {
+        comment.style.left = '40px';
+        ch.style.left = '-50px';
+    });
+    c_drop.addEventListener('click', function () {
+        c_song.style.display = 'none';
+        cc.style.height = '100%';
+    });
+    c_up.addEventListener('click', function () {
+        c_song.style.display = 'flex';
+        cc.style.height = '0';
+    });
+    cc.addEventListener('click', function (e) {
+        if (e.target.className === 'icon-- iconfont ct_nice') {
+            e.target.style.color = 'red';
+        }
+    });
+</script>
+</html>
